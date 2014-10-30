@@ -11,6 +11,7 @@ public class NodeApplication {
 	
 	public NodeApplication(int port) {
 		gui = new DancingGUIFrame();
+		gui.setVisible(true);
 		
 		// Get a server thread up and running
 		do {
