@@ -4,12 +4,18 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class ServerThread extends Thread {
+/**
+ * This class is for handling TCP socket connections from other systems.
+ * @author Darren
+ *
+ */
+public class TCPReceiveThread extends Thread {
 
 	private ServerSocket serverSocket;
-
-	public ServerThread(int port) throws IOException {
+	
+	public TCPReceiveThread(int port) throws IOException {
 		serverSocket = new ServerSocket(port);
+		
 		while (true){
 			Socket socket = serverSocket.accept();
 			handleConnection(socket);
