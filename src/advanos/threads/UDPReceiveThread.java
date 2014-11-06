@@ -3,6 +3,10 @@ package advanos.threads;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+
+import advanos.NodeApplication;
 
 /**
  * <p>This thread handles receiving UDP information.
@@ -34,18 +38,17 @@ public class UDPReceiveThread extends Thread {
 	private int port = 1234;
 	private DatagramSocket socket;
 	public static final int MAX_BYTES = 100;
+	private NodeApplication nodeApplication;
 
-	public UDPReceiveThread(int port) {
+	public UDPReceiveThread(NodeApplication nodeApplication, int port) throws SocketException {
+		socket = new DatagramSocket(port);
+		this.nodeApplication = nodeApplication;
 		this.port = port;
+		
+		System.out.println(nodeApplication.processID + " has successfully created UDP thread bound at port " + port);
 	}
 
 	public void run() {
-		try {
-			socket = new DatagramSocket(port);
-		} catch (Exception ex) {
-			System.out.println("Problem creating socket on port: " + port);
-		}
-
 		DatagramPacket packet = new DatagramPacket(new byte[MAX_BYTES],
 				MAX_BYTES);
 
@@ -57,38 +60,38 @@ public class UDPReceiveThread extends Thread {
 
 				// System.out.println(packet.getAddress () + ":" +
 				// packet.getPort ()+":" + message);
-
+				
 				String[] text = message.split(" ");
-				handleMessage(text);
+				handleMessage(text, packet.getAddress().toString());
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
 	}
 
-	private void handleMessage(String[] text) {
+	private void handleMessage(String[] text, String string) {
 		switch (text[0].toUpperCase()) {
 		case "CS_REQUEST":
-			lamportMutexRequest(text);
+			lamportMutexRequest(text, string);
 			break;
 		case "BROADCAST_ALIVE":
-			networkDiscovery(text);
+			networkDiscovery(text, string);
 			break;
 		case "CS_REPLY":
-			lamportMutexReply(text);
+			lamportMutexReply(text, string);
 			break;
 		}
 	}
 
-	private void lamportMutexReply(String[] text) {
+	private void lamportMutexReply(String[] text, String inetAddress) {
 		
 	}
 
-	private void lamportMutexRequest(String[] text) {
+	private void lamportMutexRequest(String[] text, String inetAddress) {
 		// update queue in NodeApplication regarding data in text[]
 	}
 
-	private void networkDiscovery(String[] text) {
-
+	private void networkDiscovery(String[] text, String inetAddress) {
+		nodeApplication.addDiscoveredHost(inetAddress, text[1]);
 	}
 }

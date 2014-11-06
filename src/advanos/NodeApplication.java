@@ -1,6 +1,9 @@
 package advanos;
 
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 import advanos.gui.DancingGUIFrame;
@@ -24,15 +27,24 @@ public class NodeApplication {
 	 * the replies from all of the systems, totaling to <i>N-1 replies</i>.  
 	 * 
 	 */
-	private LinkedList<Request> queue;
+	private LinkedList<Request> queue = new LinkedList<Request>();
+	private ArrayList<Host> hosts = new ArrayList<Host>();
+	private int currentPort;
+	
+	public String processID;
 
 	public NodeApplication(int port) {
+		currentPort = port;
+		processID = ManagementFactory.getRuntimeMXBean().getName();
+		
 		gui = new DancingGUIFrame();
 		gui.setVisible(true);
+		gui.setTitle(processID + " " + gui.getTitle());
 		
 		queue = new LinkedList<Request>();
-
+		
 		createTCPThread(port);
+		
 		createUDPThread(port);
 		createNetworkBroadcastThread(port);
 		
@@ -41,8 +53,10 @@ public class NodeApplication {
 	private void createNetworkBroadcastThread(int port) {
 		do {
 			try {
-				// Network broadcast thread
-				byte[] data = "I'm alive.".getBytes();
+				// Network broadcast thread: broadcasts process ID
+				String message = "BROADCAST_ALIVE " + processID;
+				byte[] data = message.getBytes();
+				
 				networkBroadcastThread = new NetworkBroadcastThread(port, data);
 				networkBroadcastThread.start();
 
@@ -57,10 +71,11 @@ public class NodeApplication {
 			try {
 
 				// UDP receive thread
-				udpReceiveThread = new UDPReceiveThread(port);
+				udpReceiveThread = new UDPReceiveThread(this, port);
 				udpReceiveThread.start();
 			} catch (Exception e) {
-				e.printStackTrace();
+				System.err.println("Port " + port + " already in use in another UDP thread.");
+				port++;
 			}
 		} while (udpReceiveThread == null);
 	}
@@ -70,13 +85,22 @@ public class NodeApplication {
 		do {
 			try {
 				// TCP receive thread
-				tcpReceiveThread = new TCPReceiveThread(port);
+				tcpReceiveThread = new TCPReceiveThread(this, port);
 				tcpReceiveThread.start();
 
 			} catch (IOException e) {
-				e.printStackTrace();
+				System.err.println("Port " + port + " already in use in another TCP thread.");
+				port++;
 			}
 		} while (tcpReceiveThread == null);
+	}
+
+	public void addDiscoveredHost(String ipAddress, String processID) {
+		Host h = new Host(ipAddress, processID);
+		if (hosts.contains(h) == false){
+			hosts.add(h);
+		}
+		gui.addUser(h);
 	}
 	
 	
