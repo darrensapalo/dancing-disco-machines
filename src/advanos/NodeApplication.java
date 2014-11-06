@@ -1,6 +1,7 @@
 package advanos;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -29,12 +30,17 @@ public class NodeApplication {
 	 */
 	private LinkedList<Request> queue = new LinkedList<Request>();
 	private ArrayList<Host> hosts = new ArrayList<Host>();
+	
+	private Host leader = null;
+	private Host next = null;
 	private int currentPort;
 	
 	public String processID;
+	private boolean isLeader;
 
-	public NodeApplication(int port) {
+	public NodeApplication(int port, boolean isLeader) {
 		currentPort = port;
+		this.isLeader = isLeader;
 		processID = ManagementFactory.getRuntimeMXBean().getName();
 		
 		gui = new DancingGUIFrame();
@@ -45,16 +51,25 @@ public class NodeApplication {
 		
 		createTCPThread(port);
 		
-		createUDPThread(port);
-		createNetworkBroadcastThread(port);
+		createUDPThread(port, isLeader);
+		createNetworkBroadcastThread(port, isLeader);
 		
+		if (isLeader){
+			
+		}
+		
+		// wait -- random time 2s - 5s
+		// request for cs
 	}
-
-	private void createNetworkBroadcastThread(int port) {
+	
+	
+	private void createNetworkBroadcastThread(int port, boolean isLeader) {
 		do {
 			try {
 				// Network broadcast thread: broadcasts process ID
-				String message = "BROADCAST_ALIVE " + processID;
+				String message = "BROADCAST_ALIVE " + processID + " " + port;
+				if (isLeader)
+					message += " LEADER";
 				byte[] data = message.getBytes();
 				
 				networkBroadcastThread = new NetworkBroadcastThread(port, data);
@@ -66,12 +81,12 @@ public class NodeApplication {
 		} while (networkBroadcastThread == null);
 	}
 
-	private void createUDPThread(int port) {
+	private void createUDPThread(int port, boolean isLeader) {
 		do {
 			try {
 
 				// UDP receive thread
-				udpReceiveThread = new UDPReceiveThread(this, port);
+				udpReceiveThread = new UDPReceiveThread(this, port, isLeader);
 				udpReceiveThread.start();
 			} catch (Exception e) {
 				System.err.println("Port " + port + " already in use in another UDP thread.");
@@ -95,13 +110,29 @@ public class NodeApplication {
 		} while (tcpReceiveThread == null);
 	}
 
-	public void addDiscoveredHost(String ipAddress, String processID) {
-		Host h = new Host(ipAddress, processID);
+	public void addDiscoveredHost(String ipAddress, String[] text) {
+		Host h = new Host(ipAddress, text[1]);
+		if (text.length == 4 && text[3].equals("LEADER"))
+			h.setLeader(true);
+		
 		if (hosts.contains(h) == false){
 			hosts.add(h);
 		}
 		gui.addUser(h);
 	}
+}
+
+interface Message extends Serializable {};
+
+class CommunicationMessage implements Message {
+	int sendingProcessNumber;
+	int time;
+	int receivingProcessNumber;
 	
-	
+	public CommunicationMessage(int sendingProcessNumber, int time,
+			int receivingProcessNumber) {
+		this.sendingProcessNumber = sendingProcessNumber;
+		this.time = time;
+		this.receivingProcessNumber = receivingProcessNumber;
+	}
 }

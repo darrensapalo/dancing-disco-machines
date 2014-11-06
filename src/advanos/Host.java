@@ -5,10 +5,12 @@ public class Host {
 	private int UDPPort;
 	private String ipAddress;
 	private String processID;
+	private boolean isLeader;
 
 	public Host(String ipAddress, String processID){
 		this.ipAddress = ipAddress;
 		this.processID = processID;
+		this.isLeader = false;
 	}
 	
 	@Override
@@ -42,5 +44,13 @@ public class Host {
 	
 	public boolean equals(Object obj) {
 		return obj instanceof Host && obj.toString().equals(toString());
+	}
+
+	public boolean isLeader() {
+		return isLeader;
+	}
+
+	public void setLeader(boolean isLeader) {
+		this.isLeader = isLeader;
 	}
 }

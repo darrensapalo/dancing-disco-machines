@@ -1,9 +1,11 @@
 package advanos.threads;
 
+import java.io.BufferedOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
+import java.net.Socket;
 import java.net.SocketException;
 
 import advanos.NodeApplication;
@@ -39,8 +41,10 @@ public class UDPReceiveThread extends Thread {
 	private DatagramSocket socket;
 	public static final int MAX_BYTES = 100;
 	private NodeApplication nodeApplication;
+	private boolean isLeader;
 
-	public UDPReceiveThread(NodeApplication nodeApplication, int port) throws SocketException {
+	public UDPReceiveThread(NodeApplication nodeApplication, int port, boolean isLeader) throws SocketException {
+		this.isLeader = isLeader;
 		socket = new DatagramSocket(port);
 		this.nodeApplication = nodeApplication;
 		this.port = port;
@@ -62,36 +66,62 @@ public class UDPReceiveThread extends Thread {
 				// packet.getPort ()+":" + message);
 				
 				String[] text = message.split(" ");
-				handleMessage(text, packet.getAddress().toString());
+				handleMessage(text, packet.getAddress().toString(), text[2]);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
 	}
 
-	private void handleMessage(String[] text, String string) {
+	private void handleMessage(String[] text, String ipAddress, String port) {
 		switch (text[0].toUpperCase()) {
 		case "CS_REQUEST":
-			lamportMutexRequest(text, string);
+			lamportMutexRequest(text, ipAddress, port);
 			break;
 		case "BROADCAST_ALIVE":
-			networkDiscovery(text, string);
+			networkDiscovery(text, ipAddress, port);
+			
+			if (isLeader)
+				leaderRingTopologyManagement(text, ipAddress, port);
 			break;
 		case "CS_REPLY":
-			lamportMutexReply(text, string);
+			lamportMutexReply(text, ipAddress, port);
 			break;
 		}
 	}
 
-	private void lamportMutexReply(String[] text, String inetAddress) {
+	private void leaderRingTopologyManagement(String[] text, String ipAddress, String port) {
+		int number = 1;
+		assignNumber(ipAddress, port, number);
+	}
+
+	private void lamportMutexReply(String[] text, String inetAddress, String port) {
 		
 	}
 
-	private void lamportMutexRequest(String[] text, String inetAddress) {
+	private void lamportMutexRequest(String[] text, String inetAddress, String port) {
 		// update queue in NodeApplication regarding data in text[]
 	}
 
-	private void networkDiscovery(String[] text, String inetAddress) {
-		nodeApplication.addDiscoveredHost(inetAddress, text[1]);
+	private void networkDiscovery(String[] text, String inetAddress, String port) {
+		nodeApplication.addDiscoveredHost(inetAddress, text);
 	}
+	
+	private void assignNumber(String ipAddress, String port, int sequence){
+		try {
+			// Network broadcast thread: broadcasts process ID
+			String message = "ASSIGN_NUMBER " + sequence;
+			byte[] data = message.getBytes();
+			
+			Socket s = new Socket(ipAddress, Integer.parseInt(port));
+			
+			OutputStream outputStream = s.getOutputStream();
+			BufferedOutputStream bOS = new BufferedOutputStream(outputStream);
+			bOS.write(data);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 }

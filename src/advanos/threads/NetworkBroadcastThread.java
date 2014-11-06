@@ -25,6 +25,7 @@ public class NetworkBroadcastThread extends Thread {
 			int port = this.port;
 			while (true) {
 				port = this.port + (offset % max);
+				
 				try {
 					InetAddress host = InetAddress.getByName("localhost");
 					DatagramSocket socket = new DatagramSocket(null);
