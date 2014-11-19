@@ -155,50 +155,31 @@ public class NodeApplication {
 		attemptToDance();
 	}
 
-//
-//	public void receiveSentToken(String[] text, String ipAddress) {
-//		// You got the token from this guy
-//		Host host = getHost(ipAddress);
-//
-//		if (host == null){
-//			addDiscoveredHost(ipAddress, text);
-//			host = getHost(ipAddress);
-//		}
-//		
-//		// Inform the guy you received it
-//		confirmReceiptOfToken(host);
-//		
-//		boolean hasDanced = false;
-//		do {
-//			try {
-//				// Only try to dance once every second. Put a delay of one second.
-//				Thread.sleep(1000);
-//				if (next != null){
-//					attemptToDance();
-//					hasDanced = true;
-//				}else{
-//					if (leader != null)
-//					{
-//						SendRingRequestMessage sendRingRequestMessage = new SendRingRequestMessage(port, null, leader.getIPAddress());
-//						sendRingRequestMessage.start();
-//					}
-//				}
-//			}catch(Exception e){
-//				e.printStackTrace();
-//			}
-//		}while(hasDanced == false);
-//		
-//	}
-	
+
 	public synchronized void attemptToDance(){
-		if (TOKEN){
-			double s = Math.random() * 100;
-			if (s > 90){ // 10% chance to dance
-				gui.dance();
+		boolean hasDanced = false;
+		do {
+			try {
+				// Only try to dance once every second. Put a delay of one second.
+				Thread.sleep(1000);
+				if (next != null){
+					if (TOKEN){
+						double s = Math.random() * 100;
+						if (s > 90){ // 10% chance to dance
+							gui.dance();
+						}
+						if (next != leader || NodeApplication.IS_LEADER == false)
+							releaseToken(next);
+					}
+					hasDanced = true;
+				}else{
+					if (leader != null)
+						leaderHandler.sendMessage("REQUEST NEXT");
+				}
+			}catch(Exception e){
+				e.printStackTrace();
 			}
-			if (next != leader || NodeApplication.IS_LEADER == false)
-				releaseToken(next);
-		}
+		}while(hasDanced == false);
 	}
 
 	private void releaseToken(Host next) {
@@ -212,6 +193,8 @@ public class NodeApplication {
 		System.out.println("Received token from " + host + "! Confirming...");
 		TCPSocketHandler fromHost = listen.getTCPSocketHandler(host);
 		fromHost.sendMessage("RECEIVED TOKEN");
+
+		
 	}
 
 	public void receiveSentTokenConfirmation(String[] text, String ipAddress) {
