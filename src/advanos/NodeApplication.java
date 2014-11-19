@@ -87,7 +87,6 @@ public class NodeApplication {
 	
 	public void addDiscoveredHost(String ipAddress, String[] text) {
 		Host h = new Host(ipAddress, text[1].split("@")[0]);
-		System.out.println("Detected " + h);
 		if (hosts.contains(h) == false) {
 			hosts.add(h);
 			
