@@ -61,6 +61,7 @@ public class TCPSocketHandler extends Thread {
 	}
 	
 	public synchronized void sendMessage(String message){
+		System.out.println("Sending message: " + message);
 		printer.println(message);
 	}
 	
