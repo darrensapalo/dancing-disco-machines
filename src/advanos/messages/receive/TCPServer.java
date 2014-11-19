@@ -35,7 +35,7 @@ public class TCPServer extends Thread {
 		while (true) {
 			try {
 				Socket newSocket = socket.accept();
-				System.out.println("Received a socket connection from " + socket.getInetAddress().toString());
+				System.out.println("Received a socket connection from " + newSocket.getInetAddress().toString());
 				TCPSocketHandler handler = new TCPSocketHandler(newSocket, node);
 				handler.start();
 				hashmap.put(newSocket.getInetAddress().toString().substring(1), handler);
