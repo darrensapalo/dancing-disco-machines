@@ -205,7 +205,7 @@ public class NodeApplication {
 		Host h = getHost(ipAddress);
 		hosts.remove(h);
 		gui.removeHost(h);
-		if (next.equals(h)){
+		if (next != null && next.equals(h)){
 			nextHandler = null;
 			next = null;
 			
@@ -217,7 +217,7 @@ public class NodeApplication {
 			}
 		}
 		
-		if (leader.equals(h)){
+		if (leader != null && leader.equals(h)){
 			leaderHandler.close();
 			leaderHandler = null;
 			leader = null;
