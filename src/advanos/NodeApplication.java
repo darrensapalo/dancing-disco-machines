@@ -98,7 +98,7 @@ public class NodeApplication {
 			SendRingAssignmentMessage message = new SendRingAssignmentMessage(port, "ASSIGN " + to.getIPAddress(), from.getIPAddress());
 			message.start();
 			
-			System.out.println(from + " assigned to send to " + to);
+			// System.out.println(from + " assigned to send to " + to);
 		} catch (SocketException | UnsupportedEncodingException | UnknownHostException e) {
 			e.printStackTrace();
 		}
@@ -127,7 +127,7 @@ public class NodeApplication {
 					assignNextInTokenRing(lastHost, newHost);
 				
 				assignNextInTokenRing(newHost, this.leader);
-				System.out.println("End of reassignment");
+				// System.out.println("End of reassignment");
 			}
 		}
 		gui.addUser(newHost);
