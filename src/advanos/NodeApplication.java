@@ -210,7 +210,8 @@ public class NodeApplication {
 	public void confirmReceiptOfToken(Host host) {
 		TOKEN = true;
 		System.out.println("Received token from " + host + "! Confirming...");
-		nextHandler.sendMessage("RECEIVED TOKEN");
+		TCPSocketHandler fromHost = listen.getTCPSocketHandler(host);
+		fromHost.sendMessage("RECEIVED TOKEN");
 	}
 
 	public void receiveSentTokenConfirmation(String[] text, String ipAddress) {
