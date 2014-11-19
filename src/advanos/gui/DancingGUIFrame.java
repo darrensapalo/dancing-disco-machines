@@ -48,6 +48,9 @@ public class DancingGUIFrame extends JFrame {
 		setLayout(boxLayout);
 		pack();
 		setLocationRelativeTo(null);
+		setVisible(true);
+		
+
 	}
 
 	public void addUser(Host h) {
