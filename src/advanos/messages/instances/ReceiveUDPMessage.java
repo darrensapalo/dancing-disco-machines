@@ -36,6 +36,10 @@ public class ReceiveUDPMessage extends ReceiveMessage
 		case "RECEIVED":
 			nodeApplication.receiveSentTokenConfirmation(text, ipAddress);
 			break;
+			
+		case "REQUEST":
+			if (text[1].equalsIgnoreCase("NEXT"))
+				nodeApplication.reAssignNextInToken(ipAddress);
 		}
 	}
 

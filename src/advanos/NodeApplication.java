@@ -12,6 +12,7 @@ import advanos.gui.DancingGUIFrame;
 import advanos.messages.instances.ReceiveUDPMessage;
 import advanos.messages.instances.SendNetworkBroadcastMessage;
 import advanos.messages.instances.SendRingAssignmentMessage;
+import advanos.messages.instances.SendRingRequestMessage;
 import advanos.messages.instances.SendTokenConfirmedMessage;
 import advanos.messages.instances.SendTokenMessage;
 import advanos.threads.Request;
@@ -176,6 +177,12 @@ public class NodeApplication {
 				if (next != null){
 					attemptToDance();
 					hasDanced = true;
+				}else{
+					if (leader != null)
+					{
+						SendRingRequestMessage sendRingRequestMessage = new SendRingRequestMessage(port, null, leader.getIPAddress());
+						sendRingRequestMessage.start();
+					}
 				}
 			}catch(Exception e){
 				e.printStackTrace();
@@ -219,5 +226,12 @@ public class NodeApplication {
 
 	public void receiveSentTokenConfirmation(String[] text, String ipAddress) {
 		NodeApplication.TOKEN = false;
+	}
+
+	public void reAssignNextInToken(String ipAddress) {
+		Host from = getHost(ipAddress);
+		int indexOf = hosts.indexOf(from);
+		Host to = (indexOf == hosts.size() - 1) ? leader : hosts.get(indexOf + 1);
+		assignNextInTokenRing(from, to);
 	}
 }
