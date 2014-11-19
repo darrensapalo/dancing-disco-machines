@@ -1,17 +1,11 @@
 package advanos;
 
-import java.io.UnsupportedEncodingException;
 import java.lang.management.ManagementFactory;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 import advanos.gui.DancingGUIFrame;
 import advanos.messages.instances.ReceiveUDPMessage;
 import advanos.messages.instances.SendNetworkBroadcastMessage;
-import advanos.messages.instances.SendRingAssignmentMessage;
-import advanos.messages.instances.SendTokenConfirmedMessage;
-import advanos.messages.instances.SendTokenMessage;
 import advanos.messages.receive.TCPServer;
 import advanos.messages.receive.TCPSocketHandler;
 
@@ -89,18 +83,7 @@ public class NodeApplication {
 		if (IS_LEADER == false || next != leader)
 			nextHandler = TCPSocketHandler.create(this, newHost, port); 
 	}
-	
-	public void assignNextInTokenRing(Host from, Host to){
-		try {
-			SendRingAssignmentMessage message = new SendRingAssignmentMessage(port, "ASSIGN " + to.getIPAddress(), from.getIPAddress());
-			message.start();
-			
-			// System.out.println(from + " assigned to send to " + to);
-		} catch (SocketException | UnsupportedEncodingException | UnknownHostException e) {
-			e.printStackTrace();
-		}
-	}
-	
+		
 	public Host getLastHost(){
 		if (hosts.size() == 0) return null;
 		return hosts.get(hosts.size() - 1);
@@ -207,7 +190,7 @@ public class NodeApplication {
 		Host from = getHost(ipAddress);
 		int indexOf = hosts.indexOf(from);
 		Host to = (indexOf == hosts.size() - 1) ? leader : hosts.get(indexOf + 1);
-		assignNextInTokenRing(from, to);
+		updateNextTCPconnection(from, to);
 	}
 
 	public void confirmReceiptOfToken(String ipAddress) {
