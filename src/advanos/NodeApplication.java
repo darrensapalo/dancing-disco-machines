@@ -93,8 +93,9 @@ public class NodeApplication {
 		return null;
 	}
 	
-	public void setNextInTokenRing(String ipAddress){
+	public synchronized void setNextInTokenRing(String ipAddress){
 		this.next = getHost(ipAddress);
+		System.out.println("I now know who is next after me: " + this.next);
 	}
 	
 	public void assignNextInTokenRing(Host from, Host to){
@@ -128,19 +129,26 @@ public class NodeApplication {
 			}
 			
 			if (NodeApplication.IS_LEADER){
+				System.err.println("Beginning to fix network topology...");
 				if (lastHost != null){
-					if (lastHost.equals(this.leader))
+					if (lastHost.equals(this.leader)){
+						System.err.println("Leader assigned to first node.");
 						this.next = newHost;
-					else
+					}else{
+						System.err.println("The last node, " + lastHost + " is attached to the new node, " + newHost);
 						assignNextInTokenRing(lastHost, newHost);
+					}
 				}
 				
 				
-				if (this.leader != null && newHost.equals(this.leader) == false)
+				if (this.leader != null && newHost.equals(this.leader) == false){
+					System.err.println("Since I already know who the leader is, I'll assign the newest node to send to the leader.");
 					assignNextInTokenRing(newHost, this.leader);
-				else
+				}else{
+					System.err.println("I still don't know the leader, or maybe the new host is the leader. I'll just assign myself to send to myself.");
 					this.next = newHost;
 				// System.out.println("End of reassignment");
+				}
 				
 				attemptToDance();
 			}
