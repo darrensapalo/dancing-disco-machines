@@ -73,11 +73,15 @@ public class TCPSocketHandler extends Thread {
 					try {
 						// Try to wait for the host to be identified
 						Thread.sleep(1000);
+						System.err.println("I still don't know this host. Please wait until I discover it.");
 					}catch(Exception e){
 						
 					}
 				}
 				node.createNextTCPconnection(text[2]);
+				if (NodeApplication.TOKEN){
+					node.attemptToDance();
+				}
 			}
 			
 			break;
