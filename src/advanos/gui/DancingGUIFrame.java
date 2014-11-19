@@ -1,18 +1,13 @@
 package advanos.gui;
 
-import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 
-import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
-import javax.swing.ListModel;
-import javax.swing.ScrollPaneConstants;
 
 import advanos.Host;
 

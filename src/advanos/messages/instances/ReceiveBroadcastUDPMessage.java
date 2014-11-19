@@ -61,7 +61,7 @@ public class ReceiveBroadcastUDPMessage extends ReceiveMulticastMessage
 			OutputStream outputStream = s.getOutputStream();
 			BufferedOutputStream bOS = new BufferedOutputStream(outputStream);
 			bOS.write(data);
-			
+			s.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
