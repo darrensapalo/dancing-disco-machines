@@ -80,7 +80,8 @@ public class NodeApplication {
 	}
 	
 	public synchronized void createNextTCPconnection(String ipAddress){
-		createNextTCPconnection(getHost(ipAddress));
+		Host host = getHost(ipAddress);
+		createNextTCPconnection(host);
 	}
 	
 	public synchronized void createNextTCPconnection(Host newHost){

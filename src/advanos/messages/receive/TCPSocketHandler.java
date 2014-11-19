@@ -67,8 +67,19 @@ public class TCPSocketHandler extends Thread {
 	public void handleMessage(String[] text, String ipAddress) {
 		switch (text[0].toUpperCase()) {
 		case "ASSIGN":
-			if (text[1].equalsIgnoreCase("NEXT"))
+			if (text[1].equalsIgnoreCase("NEXT")){
+				while(node.getHost(text[2]) == null)
+				{
+					try {
+						// Try to wait for the host to be identified
+						Thread.sleep(1000);
+					}catch(Exception e){
+						
+					}
+				}
 				node.createNextTCPconnection(text[2]);
+			}
+			
 			break;
 
 		case "SEND":
