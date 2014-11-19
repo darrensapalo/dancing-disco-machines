@@ -20,7 +20,9 @@ public class TCPSocketHandler extends Thread {
 	public static TCPSocketHandler create(NodeApplication node, Host host, int port){
 		try {
 			Socket socket = new Socket(host.getIPAddress(), port);
-			return new TCPSocketHandler(socket, node);
+			TCPSocketHandler tcpSocketHandler = new TCPSocketHandler(socket, node);
+			tcpSocketHandler.start();
+			return tcpSocketHandler;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -35,10 +37,9 @@ public class TCPSocketHandler extends Thread {
 			InputStream inputStream = socket.getInputStream();
 			bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 		
-		
-		OutputStream outputStream = socket.getOutputStream();
-		printer = new PrintWriter(outputStream, true);
-		
+			OutputStream outputStream = socket.getOutputStream();
+			printer = new PrintWriter(outputStream, true);
+			
 		}catch(Exception e){
 			e.printStackTrace();
 		}
