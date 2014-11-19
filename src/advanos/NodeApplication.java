@@ -91,7 +91,6 @@ public class NodeApplication {
 	
 	public void setNextInTokenRing(String ipAddress){
 		this.next = getHost(ipAddress);
-		System.out.println("Send next to " + this.next);
 	}
 	
 	public void assignNextInTokenRing(Host from, Host to){
@@ -106,12 +105,14 @@ public class NodeApplication {
 	}
 	
 	public Host getLastHost(){
+		if (hosts.size() == 0) return null;
 		return hosts.get(hosts.size() - 1);
 	}
 	
 	public void addDiscoveredHost(String ipAddress, String[] text) {
 		Host newHost = new Host(ipAddress, text[1].split("@")[0]);
 		if (hosts.contains(newHost) == false) {
+			Host lastHost = getLastHost();
 			hosts.add(newHost);
 			
 			//		     [0]                    [1]                 [2]
@@ -122,8 +123,11 @@ public class NodeApplication {
 			}
 			
 			if (NodeApplication.IS_LEADER){
-				Host lastHost = getLastHost();
-				assignNextInTokenRing(lastHost, this.leader);
+				if (lastHost != null)
+					assignNextInTokenRing(lastHost, newHost);
+				
+				assignNextInTokenRing(newHost, this.leader);
+				System.out.println("End of reassignment");
 			}
 		}
 		gui.addUser(newHost);
