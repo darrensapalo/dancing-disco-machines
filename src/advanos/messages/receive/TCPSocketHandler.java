@@ -50,7 +50,7 @@ public class TCPSocketHandler extends Thread {
 				while((line = bufferedReader.readLine()) != null){
 					String[] text = line.split(" ");
 					String ipAddress = socket.getInetAddress().toString().substring(1);
-					
+					System.out.println("received message: " + line);
 					handleMessage(text, ipAddress);
 				}
 			} catch (IOException e) {

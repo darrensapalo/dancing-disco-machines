@@ -203,23 +203,13 @@ public class NodeApplication {
 	private void releaseToken(Host next) {
 		TOKEN = false;
 		System.out.println("Releasing token, giving it to " + next);
-		try {
-			SendTokenMessage sendTokenMessage = new SendTokenMessage(port, null, next.getIPAddress());
-			sendTokenMessage.start();
-		} catch (SocketException | UnsupportedEncodingException | UnknownHostException e) {
-			e.printStackTrace();
-		}
+		nextHandler.sendMessage("SEND TOKEN");
 	}
 
 	public void confirmReceiptOfToken(Host host) {
 		TOKEN = true;
 		System.out.println("Received token from " + host + "! Confirming...");
-		try {
-			SendTokenConfirmedMessage sendTokenConfirmedMessage = new SendTokenConfirmedMessage(port, null, host.getIPAddress());
-			sendTokenConfirmedMessage.start();
-		} catch (SocketException | UnsupportedEncodingException | UnknownHostException e) {
-			e.printStackTrace();
-		}
+		nextHandler.sendMessage("RECEIVED TOKEN");
 	}
 
 	public void receiveSentTokenConfirmation(String[] text, String ipAddress) {
