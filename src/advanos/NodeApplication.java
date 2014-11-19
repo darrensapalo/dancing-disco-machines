@@ -142,7 +142,6 @@ public class NodeApplication {
 					this.next = newHost;
 				// System.out.println("End of reassignment");
 				
-				
 				attemptToDance();
 			}
 		}
@@ -160,13 +159,20 @@ public class NodeApplication {
 		
 		// Inform the guy you received it
 		confirmReceiptOfToken(host);
-		try {
-			// Only try to dance once every second. Put a delay of one second.
-			Thread.sleep(1000);
-			attemptToDance();
-		}catch(Exception e){
-			
-		}
+		
+		boolean hasDanced = false;
+		do {
+			try {
+				// Only try to dance once every second. Put a delay of one second.
+				Thread.sleep(1000);
+				if (next != null){
+					attemptToDance();
+					hasDanced = true;
+				}
+			}catch(Exception e){
+				e.printStackTrace();
+			}
+		}while(hasDanced == false);
 		
 	}
 	
