@@ -78,6 +78,7 @@ public class NodeApplication {
 	}
 
 	public synchronized void createNextTCPconnection(Host newHost) {
+		if (next.equals(newHost)) return;
 		next = newHost;
 		
 		if (nextHandler != null){
