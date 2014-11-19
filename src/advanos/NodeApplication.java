@@ -1,20 +1,26 @@
 package advanos;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
 import advanos.gui.DancingGUIFrame;
-import advanos.messages.instances.ReceiveBroadcastUDPMessage;
+import advanos.messages.instances.ReceiveUDPMessage;
 import advanos.messages.instances.SendNetworkBroadcastMessage;
+import advanos.messages.instances.SendRingAssignmentMessage;
 import advanos.threads.Request;
 
 public class NodeApplication {
 
 	private DancingGUIFrame gui;
+	
 	private SendNetworkBroadcastMessage networkBroadcastThread;
-	private ReceiveBroadcastUDPMessage receiveUDPThread;
+	private ReceiveUDPMessage receiveUDPThread;
+
 
 	public static String MULTICAST_GROUP;
 
@@ -35,8 +41,10 @@ public class NodeApplication {
 
 	public static String PROCESS_ID;
 	public static boolean IS_LEADER;
+	private int port;
 
 	public NodeApplication(int port, boolean isLeader) {
+		this.port = port;
 		NodeApplication.IS_LEADER = isLeader;
 		NodeApplication.PROCESS_ID = ManagementFactory.getRuntimeMXBean().getName();
 
@@ -47,10 +55,10 @@ public class NodeApplication {
 		queue = new LinkedList<Request>();
 
 		createNetworkBroadcastThread(port);
-		createReceiveBroadcastUDPThread(port);
-
+		createReceiveUDPThread(port);
 		if (isLeader) {
 
+			
 		}
 	}
 
@@ -63,9 +71,9 @@ public class NodeApplication {
 		}
 	}
 
-	private void createReceiveBroadcastUDPThread(int port) {
+	private void createReceiveUDPThread(int port) {
 		try {
-			receiveUDPThread = new ReceiveBroadcastUDPMessage(this, port, InetAddress.getByName(MULTICAST_GROUP));
+			receiveUDPThread = new ReceiveUDPMessage(this, port, InetAddress.getByName(MULTICAST_GROUP));
 			receiveUDPThread.start();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -81,22 +89,43 @@ public class NodeApplication {
 		return null;
 	}
 	
-	public void assignNextInTokenRing(String ipAddress){
+	public void setNextInTokenRing(String ipAddress){
 		this.next = getHost(ipAddress);
+		System.out.println("Send next to " + this.next);
+	}
+	
+	public void assignNextInTokenRing(Host from, Host to){
+		try {
+			SendRingAssignmentMessage message = new SendRingAssignmentMessage(port, "ASSIGN " + to.getIPAddress(), from.getIPAddress());
+			message.start();
+			
+			System.out.println(from + " assigned to send to " + to);
+		} catch (SocketException | UnsupportedEncodingException | UnknownHostException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public Host getLastHost(){
+		return hosts.get(hosts.size() - 1);
 	}
 	
 	public void addDiscoveredHost(String ipAddress, String[] text) {
-		Host h = new Host(ipAddress, text[1].split("@")[0]);
-		if (hosts.contains(h) == false) {
-			hosts.add(h);
+		Host newHost = new Host(ipAddress, text[1].split("@")[0]);
+		if (hosts.contains(newHost) == false) {
+			hosts.add(newHost);
 			
 			//		     [0]                    [1]                 [2]
 			// BROADCAST_ALIVE (IP ADDRESS AND PROCESS ID) <LEADER>
-			if (text.length == 3 && text[2].equalsIgnoreCase("LEADER")){
-				h.setLeader(true);
-				this.leader = h;
+			if (text.length == 3 && text[2].trim().equalsIgnoreCase("LEADER")){
+				newHost.setLeader(true);
+				this.leader = newHost;
+			}
+			
+			if (NodeApplication.IS_LEADER){
+				Host lastHost = getLastHost();
+				assignNextInTokenRing(lastHost, this.leader);
 			}
 		}
-		gui.addUser(h);
+		gui.addUser(newHost);
 	}
 }

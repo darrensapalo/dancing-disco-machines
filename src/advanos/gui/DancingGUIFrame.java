@@ -54,7 +54,6 @@ public class DancingGUIFrame extends JFrame {
 		String elem = h.toString();
 		if (listModel.contains(elem) == false) {
 			listModel.addElement(elem);
-			System.out.println("Added: " + elem);
 			connectedUsers.repaint();
 		}
 	}

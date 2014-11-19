@@ -11,6 +11,6 @@ public class Driver {
 //		String isLeader = args[0];
 //		boolean isLead = isLeader.equals("true");
 		
-		new NodeApplication(4040, true);
+		new NodeApplication(4040, false);
 	}
 }
