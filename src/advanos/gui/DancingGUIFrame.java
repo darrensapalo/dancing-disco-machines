@@ -61,7 +61,7 @@ public class DancingGUIFrame extends JFrame {
 		}
 	}
 	
-	public void removeUser(Host h){
+	public void removeHost(Host h){
 		String elem = h.toString();
 		listModel.removeElement(elem);
 	}

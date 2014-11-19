@@ -204,7 +204,7 @@ public class NodeApplication {
 	public void removeHost(String ipAddress) {
 		Host h = getHost(ipAddress);
 		hosts.remove(h);
-		
+		gui.removeHost(h);
 		if (next.equals(h)){
 			nextHandler.close();
 			
