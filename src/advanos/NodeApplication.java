@@ -79,6 +79,11 @@ public class NodeApplication {
 
 	public synchronized void createNextTCPconnection(Host newHost) {
 		next = newHost;
+		
+		if (nextHandler != null){
+			nextHandler.close();
+		}
+		
 		if (IS_LEADER == false || next != leader)
 			nextHandler = TCPSocketHandler.create(this, newHost, port);
 	}
@@ -194,6 +199,23 @@ public class NodeApplication {
 
 	public void confirmReceiptOfToken(String ipAddress) {
 		confirmReceiptOfToken(getHost(ipAddress));
+	}
+
+	public void removeHost(String ipAddress) {
+		Host h = getHost(ipAddress);
+		hosts.remove(h);
+		
+		if (next.equals(h)){
+			nextHandler.close();
+			
+			if (leader != null){
+				leaderHandler.sendMessage("REQUEST NEXT");
+			}
+		}
+		
+		if (leader.equals(h)){
+			leaderHandler.close();
+		}
 	}
 
 }

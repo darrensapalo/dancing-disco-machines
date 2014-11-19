@@ -99,6 +99,24 @@ public class TCPSocketHandler extends Thread {
 		case "REQUEST":
 			if (text[1].equalsIgnoreCase("NEXT"))
 				node.reAssignNextInToken(ipAddress);
+			break;
+		case "CLOSE":
+				node.removeHost(ipAddress);
+			break;
+		}
+	}
+
+	public void close() {
+		try {
+			printer.println("CLOSE");
+		} catch (Exception e) {
+			System.out.println("Could not close inform other host that connection is being closed.");
+		}
+		
+		try {
+			socket.close();
+		}catch(IOException e){
+			System.out.println("Connection is closed.");
 		}
 	}
 }
