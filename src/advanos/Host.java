@@ -53,4 +53,8 @@ public class Host {
 	public void setLeader(boolean isLeader) {
 		this.isLeader = isLeader;
 	}
+
+	public String getIPAddress() {
+		return ipAddress;
+	}
 }

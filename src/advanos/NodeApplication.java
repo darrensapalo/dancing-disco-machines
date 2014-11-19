@@ -1,138 +1,103 @@
 package advanos;
 
-import java.io.IOException;
-import java.io.Serializable;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
 import advanos.gui.DancingGUIFrame;
-import advanos.threads.NetworkBroadcastThread;
+import advanos.messages.instances.ReceiveBroadcastUDPMessage;
+import advanos.messages.instances.SendNetworkBroadcastMessage;
 import advanos.threads.Request;
-import advanos.threads.TCPReceiveThread;
-import advanos.threads.UDPReceiveThread;
 
 public class NodeApplication {
-	private TCPReceiveThread tcpReceiveThread;
+
 	private DancingGUIFrame gui;
-	private NetworkBroadcastThread networkBroadcastThread;
-	private UDPReceiveThread udpReceiveThread;
-	
+	private SendNetworkBroadcastMessage networkBroadcastThread;
+	private ReceiveBroadcastUDPMessage receiveUDPThread;
+
+	public static String MULTICAST_GROUP;
+
 	/**
-	 * This queue will be used for the updating of Lamport timestamps,
-	 * which is used for implementing the mutex within distributed systems.
+	 * This queue will be used for the updating of Lamport timestamps, which is
+	 * used for implementing the mutex within distributed systems.
 	 * 
-	 * Before a process can enter its critical section, it must first send
-	 * a CS request to everyone in the network and it must have received 
-	 * the replies from all of the systems, totaling to <i>N-1 replies</i>.  
+	 * Before a process can enter its critical section, it must first send a CS
+	 * request to everyone in the network and it must have received the replies
+	 * from all of the systems, totaling to <i>N-1 replies</i>.
 	 * 
 	 */
 	private LinkedList<Request> queue = new LinkedList<Request>();
 	private ArrayList<Host> hosts = new ArrayList<Host>();
-	
+
 	private Host leader = null;
 	private Host next = null;
-	private int currentPort;
-	
-	public String processID;
-	private boolean isLeader;
+
+	public static String PROCESS_ID;
+	public static boolean IS_LEADER;
 
 	public NodeApplication(int port, boolean isLeader) {
-		currentPort = port;
-		this.isLeader = isLeader;
-		processID = ManagementFactory.getRuntimeMXBean().getName();
-		
+		NodeApplication.IS_LEADER = isLeader;
+		NodeApplication.PROCESS_ID = ManagementFactory.getRuntimeMXBean().getName();
+
 		gui = new DancingGUIFrame();
 		gui.setVisible(true);
-		gui.setTitle(processID + " " + gui.getTitle());
-		
+		gui.setTitle(PROCESS_ID + " " + gui.getTitle());
+
 		queue = new LinkedList<Request>();
-		
-		createTCPThread(port);
-		
-		createUDPThread(port, isLeader);
-		createNetworkBroadcastThread(port, isLeader);
-		
-		if (isLeader){
-			
+
+		createNetworkBroadcastThread(port);
+		createReceiveBroadcastUDPThread(port);
+
+		if (isLeader) {
+
 		}
+	}
+
+	private void createNetworkBroadcastThread(int port) {
+		try {
+			networkBroadcastThread = new SendNetworkBroadcastMessage(port, null, MULTICAST_GROUP);
+			networkBroadcastThread.start();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void createReceiveBroadcastUDPThread(int port) {
+		try {
+			receiveUDPThread = new ReceiveBroadcastUDPMessage(this, port, InetAddress.getByName(MULTICAST_GROUP));
+			receiveUDPThread.start();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	
+	public Host getHost(String ipAddress){
+		for (Host h : hosts)
+			if (h.getIPAddress().equalsIgnoreCase(ipAddress))
+				return h;
 		
-		// wait -- random time 2s - 5s
-		// request for cs
+		return null;
 	}
 	
+	public void assignNextInTokenRing(String ipAddress){
+		this.next = getHost(ipAddress);
+	}
 	
-	private void createNetworkBroadcastThread(int port, boolean isLeader) {
-		do {
-			try {
-				// Network broadcast thread: broadcasts process ID
-				String message = "BROADCAST_ALIVE " + processID + " " + port;
-				if (isLeader)
-					message += " LEADER";
-				byte[] data = message.getBytes();
-				
-				networkBroadcastThread = new NetworkBroadcastThread(port, data);
-				networkBroadcastThread.start();
-
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		} while (networkBroadcastThread == null);
-	}
-
-	private void createUDPThread(int port, boolean isLeader) {
-		do {
-			try {
-
-				// UDP receive thread
-				udpReceiveThread = new UDPReceiveThread(this, port, isLeader);
-				udpReceiveThread.start();
-			} catch (Exception e) {
-				System.err.println("Port " + port + " already in use in another UDP thread.");
-				port++;
-			}
-		} while (udpReceiveThread == null);
-	}
-
-	private void createTCPThread(int port) {
-		// Get a server thread up and running
-		do {
-			try {
-				// TCP receive thread
-				tcpReceiveThread = new TCPReceiveThread(this, port);
-				tcpReceiveThread.start();
-
-			} catch (IOException e) {
-				System.err.println("Port " + port + " already in use in another TCP thread.");
-				port++;
-			}
-		} while (tcpReceiveThread == null);
-	}
-
 	public void addDiscoveredHost(String ipAddress, String[] text) {
 		Host h = new Host(ipAddress, text[1]);
-		if (text.length == 4 && text[3].equals("LEADER"))
-			h.setLeader(true);
-		
-		if (hosts.contains(h) == false){
+
+		if (hosts.contains(h) == false) {
 			hosts.add(h);
+			
+			//		     [0]                    [1]                 [2]
+			// BROADCAST_ALIVE (IP ADDRESS AND PROCESS ID) <LEADER>
+			if (text.length == 3 && text[2].equalsIgnoreCase("LEADER")){
+				h.setLeader(true);
+				this.leader = h;
+			}
 		}
 		gui.addUser(h);
-	}
-}
-
-interface Message extends Serializable {};
-
-class CommunicationMessage implements Message {
-	int sendingProcessNumber;
-	int time;
-	int receivingProcessNumber;
-	
-	public CommunicationMessage(int sendingProcessNumber, int time,
-			int receivingProcessNumber) {
-		this.sendingProcessNumber = sendingProcessNumber;
-		this.time = time;
-		this.receivingProcessNumber = receivingProcessNumber;
 	}
 }

@@ -19,7 +19,7 @@ public class TCPReceiveThread extends Thread {
 	public TCPReceiveThread(NodeApplication nodeApplication, int port) throws IOException  {
 			this.nodeApplication = nodeApplication;
 			serverSocket = new ServerSocket(port);
-			System.out.println(nodeApplication.processID + " has successfully created TCP thread bound at port " + port);
+			System.out.println(nodeApplication.PROCESS_ID + " has successfully created TCP thread bound at port " + port);
 	}
 	
 	public void run() {
