@@ -152,7 +152,6 @@ public class NodeApplication {
 	public synchronized void attemptToDance() {
 		try {
 			// Only try to dance once every second. Put a delay of one second.
-			Thread.sleep(1000);
 			if (next != null) {
 				if (TOKEN) {
 					double s = Math.random() * 100;

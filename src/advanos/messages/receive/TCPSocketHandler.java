@@ -58,8 +58,7 @@ public class TCPSocketHandler extends Thread {
 					handleMessage(text, ipAddress);
 				}
 			} catch (IOException e) {
-				e.printStackTrace();
-				System.err.println("Connection failed somehow. Closing the connection.");
+				System.err.println("The connection suddenly failed.");
 				isClosed = true;
 				node.removeHost(ipAddress);
 			}
@@ -88,7 +87,7 @@ public class TCPSocketHandler extends Thread {
 					try {
 						// Try to wait for the host to be identified
 						Thread.sleep(1000);
-						System.err.println("I still don't know this host. Please wait until I discover it.");
+						System.err.println("I still don't know this host. I'll wait for a second until I discover it.");
 					}catch(Exception e){
 						
 					}
