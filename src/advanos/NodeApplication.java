@@ -116,8 +116,8 @@ public class NodeApplication {
 			// BROADCAST_ALIVE (IP ADDRESS AND PROCESS ID) <LEADER>
 			if (text.length == 3 && text[2].trim().equalsIgnoreCase("LEADER")){
 				newHost.setLeader(true);
-				this.leader = newHost;
-				
+				leader = newHost;
+				leaderHandler = TCPSocketHandler.create(this, leader, port);
 			}
 			if (NodeApplication.IS_LEADER)
 				organizeNetworkRingTopology(lastHost, newHost);
