@@ -29,7 +29,7 @@ public abstract class SendMessage extends Thread {
 		this.destination = InetAddress.getByName(ipAddress);
 		this.socket = new DatagramSocket(null);
 		this.port = port;
-		this.data = message.getBytes();
+		this.data = message.getBytes("UTF-8");
 
 	}
 

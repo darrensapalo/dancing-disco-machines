@@ -30,7 +30,7 @@ public abstract class ReceiveMulticastMessage extends ReceiveMessage {
 		while (true) {
 			try {
 				socket.receive(packet);
-				String message = new String(packet.getData());
+				String message = new String(packet.getData(), "UTF-8");
 				String[] text = message.split(" ");
 				handleMessage(text, packet.getAddress().toString());
 			} catch (IOException e) {
