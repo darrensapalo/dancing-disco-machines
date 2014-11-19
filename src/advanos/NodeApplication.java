@@ -206,15 +206,21 @@ public class NodeApplication {
 		hosts.remove(h);
 		gui.removeHost(h);
 		if (next.equals(h)){
-			nextHandler.close();
+			nextHandler = null;
+			next = null;
 			
 			if (leader != null){
-				leaderHandler.sendMessage("REQUEST NEXT");
+				if (NodeApplication.IS_LEADER == false)
+					leaderHandler.sendMessage("REQUEST NEXT");
+				else
+					reAssignNextInToken(leader.getIPAddress());
 			}
 		}
 		
 		if (leader.equals(h)){
 			leaderHandler.close();
+			leaderHandler = null;
+			leader = null;
 		}
 	}
 

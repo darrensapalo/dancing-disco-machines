@@ -16,6 +16,8 @@ public class TCPSocketHandler extends Thread {
 	private PrintWriter printer;
 	private NodeApplication node;
 	private BufferedReader bufferedReader;
+	private boolean isClosed;
+	private String ipAddress;
 	
 	public static TCPSocketHandler create(NodeApplication node, Host host, int port){
 		try {
@@ -31,6 +33,7 @@ public class TCPSocketHandler extends Thread {
 	
 	public TCPSocketHandler(Socket socket, NodeApplication node){
 		this.socket = socket;
+		ipAddress = socket.getInetAddress().toString().substring(1);
 		this.node = node;
 		
 		try {
@@ -45,19 +48,27 @@ public class TCPSocketHandler extends Thread {
 		}
 	}
 	public void run() {
-		while(true){
+		while(isClosed == false){
 			String line;
 			try {
-				while((line = bufferedReader.readLine()) != null){
+				while(isClosed == false && (line = bufferedReader.readLine()) != null){
 					String[] text = line.split(" ");
 					String ipAddress = socket.getInetAddress().toString().substring(1);
-					System.out.println("received message: " + line);
+					System.out.println("received message: " + line + " from " + node.getHost(ipAddress));
 					handleMessage(text, ipAddress);
 				}
 			} catch (IOException e) {
-				close();
+				e.printStackTrace();
+				isClosed = true;
+				node.removeHost(ipAddress);
 			}
 		}
+		try {
+			socket.close();			
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+		
 	}
 	
 	public synchronized void sendMessage(String message){
@@ -114,10 +125,6 @@ public class TCPSocketHandler extends Thread {
 			System.out.println("Could not close inform other host that connection is being closed.");
 		}
 		
-		try {
-			socket.close();
-		}catch(IOException e){
-			System.out.println("Connection is closed.");
-		}
+		isClosed = true;
 	}
 }
