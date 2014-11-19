@@ -158,6 +158,11 @@ public class NodeApplication {
 					double s = Math.random() * 100;
 					if (s > 90) { // 10% chance to dance
 						gui.dance();
+						
+						// Dance for 2 seconds
+						Thread.sleep(2000);
+						
+						gui.stopDance();
 					}
 					if (next != leader || NodeApplication.IS_LEADER == false)
 						releaseToken(next);
@@ -205,8 +210,11 @@ public class NodeApplication {
 
 	public void removeHost(String ipAddress) {
 		Host h = getHost(ipAddress);
-		hosts.remove(h);
-		gui.removeHost(h);
+		if (h != null){
+			hosts.remove(h);
+			gui.removeHost(h);
+		}
+		
 		if (next != null && next.equals(h)){
 			nextHandler = null;
 			next = null;

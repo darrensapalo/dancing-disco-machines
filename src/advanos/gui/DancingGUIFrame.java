@@ -74,8 +74,10 @@ public class DancingGUIFrame extends JFrame {
 	}
 
 	public void dance() {
-		System.err.println("I'm dancing!");
-		System.out.println();
-		
+		setDanceOnStage(true);
+	}
+	
+	public void stopDance() {
+		setDanceOnStage(false);
 	}
 }
