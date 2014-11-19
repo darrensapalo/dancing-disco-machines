@@ -120,7 +120,7 @@ public class TCPSocketHandler extends Thread {
 
 	public void close() {
 		try {
-			printer.println("CLOSE");
+			sendMessage("CLOSE");
 		} catch (Exception e) {
 			System.out.println("Could not close inform other host that connection is being closed.");
 		}
