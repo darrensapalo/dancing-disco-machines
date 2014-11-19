@@ -55,7 +55,7 @@ public class TCPSocketHandler extends Thread {
 					handleMessage(text, ipAddress);
 				}
 			} catch (IOException e) {
-				e.printStackTrace();
+				close();
 			}
 		}
 	}
