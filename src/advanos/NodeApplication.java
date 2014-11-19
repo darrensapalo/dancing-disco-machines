@@ -107,6 +107,7 @@ public class NodeApplication {
 	public synchronized void addDiscoveredHost(String ipAddress, String[] text) {
 		Host newHost = new Host(ipAddress, text[1].split("@")[0]);
 		if (hosts.contains(newHost) == false) {
+			Host lastHost = getLastHost();
 			hosts.add(newHost);
 			
 			//		     [0]                    [1]                 [2]
@@ -117,15 +118,15 @@ public class NodeApplication {
 				
 			}
 			if (NodeApplication.IS_LEADER)
-				organizeNetworkRingTopology(newHost);
+				organizeNetworkRingTopology(lastHost, newHost);
 			
 		}
 		gui.addUser(newHost);
 	}
 
-	private void organizeNetworkRingTopology(Host newHost) {
+	private void organizeNetworkRingTopology(Host lastHost, Host newHost) {
 		System.err.println("Beginning to fix network topology...");
-		Host lastHost = getLastHost();
+		
 		
 		if (lastHost != null){
 			if (lastHost.equals(this.leader)){
