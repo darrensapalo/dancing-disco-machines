@@ -152,6 +152,11 @@ public class NodeApplication {
 	public void receiveSentToken(String[] text, String ipAddress) {
 		// You got the token from this guy
 		Host host = getHost(ipAddress);
+
+		if (host == null){
+			addDiscoveredHost(ipAddress, text);
+			host = getHost(ipAddress);
+		}
 		
 		// Inform the guy you received it
 		confirmReceiptOfToken(host);
@@ -189,7 +194,7 @@ public class NodeApplication {
 
 	private void confirmReceiptOfToken(Host host) {
 		TOKEN = true;
-		System.out.println("Received token! Confirming...");
+		System.out.println("Received token from " + host + "! Confirming...");
 		try {
 			SendTokenConfirmedMessage sendTokenConfirmedMessage = new SendTokenConfirmedMessage(port, null, host.getIPAddress());
 			sendTokenConfirmedMessage.start();
