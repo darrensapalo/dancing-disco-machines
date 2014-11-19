@@ -60,7 +60,7 @@ public class TCPSocketHandler extends Thread {
 	}
 	
 	public synchronized void sendMessage(String message){
-		printer.write(message);
+		printer.println(message);
 	}
 	
 	public void handleMessage(String[] text, String ipAddress) {
