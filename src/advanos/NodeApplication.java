@@ -62,6 +62,7 @@ public class NodeApplication {
 		
 		// Listen TCP thread
 		listen = TCPServer.create(this, port);
+		listen.start();
 		
 	}
 	
