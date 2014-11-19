@@ -195,7 +195,8 @@ public class NodeApplication {
 		TCPSocketHandler fromHost = listen.getTCPSocketHandler(host);
 		fromHost.sendMessage("RECEIVED TOKEN");
 
-		
+		// Check if you want to dance
+		attemptToDance();
 	}
 
 	public void receiveSentTokenConfirmation(String[] text, String ipAddress) {
