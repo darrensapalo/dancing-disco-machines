@@ -113,7 +113,7 @@ public class NodeApplication {
 		return hosts.get(hosts.size() - 1);
 	}
 	
-	public void addDiscoveredHost(String ipAddress, String[] text) {
+	public synchronized void addDiscoveredHost(String ipAddress, String[] text) {
 		Host newHost = new Host(ipAddress, text[1].split("@")[0]);
 		if (hosts.contains(newHost) == false) {
 			Host lastHost = getLastHost();
@@ -128,14 +128,20 @@ public class NodeApplication {
 			}
 			
 			if (NodeApplication.IS_LEADER){
-				if (lastHost != null)
-					assignNextInTokenRing(lastHost, newHost);
+				if (lastHost != null){
+					if (lastHost.equals(this.leader))
+						this.next = newHost;
+					else
+						assignNextInTokenRing(lastHost, newHost);
+				}
 				
-				if (newHost.equals(this.leader) == false)
+				
+				if (this.leader != null && newHost.equals(this.leader) == false)
 					assignNextInTokenRing(newHost, this.leader);
 				else
 					this.next = newHost;
 				// System.out.println("End of reassignment");
+				
 				
 				attemptToDance();
 			}
@@ -149,8 +155,14 @@ public class NodeApplication {
 		
 		// Inform the guy you received it
 		confirmReceiptOfToken(host);
+		try {
+			// Only try to dance once every second. Put a delay of one second.
+			Thread.sleep(1000);
+			attemptToDance();
+		}catch(Exception e){
+			
+		}
 		
-		attemptToDance();
 	}
 	
 	public synchronized void attemptToDance(){
@@ -159,11 +171,13 @@ public class NodeApplication {
 			if (s > 90){ // 10% chance to dance
 				gui.dance();
 			}
-			releaseToken(next);
+			if (next != leader || NodeApplication.IS_LEADER == false)
+				releaseToken(next);
 		}
 	}
 
 	private void releaseToken(Host next) {
+		TOKEN = false;
 		System.out.println("Releasing token, giving it to " + next);
 		try {
 			SendTokenMessage sendTokenMessage = new SendTokenMessage(port, null, next.getIPAddress());
@@ -175,6 +189,7 @@ public class NodeApplication {
 
 	private void confirmReceiptOfToken(Host host) {
 		TOKEN = true;
+		System.out.println("Received token! Confirming...");
 		try {
 			SendTokenConfirmedMessage sendTokenConfirmedMessage = new SendTokenConfirmedMessage(port, null, host.getIPAddress());
 			sendTokenConfirmedMessage.start();
