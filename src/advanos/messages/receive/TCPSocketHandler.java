@@ -59,12 +59,15 @@ public class TCPSocketHandler extends Thread {
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
+				System.err.println("Connection failed somehow. Closing the connection.");
 				isClosed = true;
 				node.removeHost(ipAddress);
 			}
 		}
 		try {
-			socket.close();			
+			System.err.println("Closing the socket.");
+			socket.close();	
+			System.err.println("Socket is closed.");
 		}catch (Exception e){
 			e.printStackTrace();
 		}

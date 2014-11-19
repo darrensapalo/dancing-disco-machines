@@ -81,6 +81,7 @@ public class NodeApplication {
 		next = newHost;
 		
 		if (nextHandler != null){
+			System.err.println("-- Sending CLOSE message because next guy is replaced.");
 			nextHandler.close();
 		}
 		
@@ -218,6 +219,7 @@ public class NodeApplication {
 		}
 		
 		if (leader != null && leader.equals(h)){
+			System.err.println("-- Sending CLOSE message because leader is gone.");
 			leaderHandler.close();
 			leaderHandler = null;
 			leader = null;
