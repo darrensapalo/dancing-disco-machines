@@ -13,7 +13,7 @@ import advanos.NodeApplication;
  */
 public abstract class ReceiveMessage extends Thread
 {
-	public static final int MAX_BYTES = 500;
+	public static final int MAX_BYTES = 40;
 	
 	protected NodeApplication nodeApplication;
 	protected int port;

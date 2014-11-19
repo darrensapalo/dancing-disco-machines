@@ -32,11 +32,13 @@ public abstract class SendRepeatingMessage extends SendMessage{
 			while(true){
 				DatagramPacket packet = new DatagramPacket(data, data.length, destination, port);
 				socket.send(packet);
-				socket.close();
+				
 				Thread.sleep(msDelay);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+		}finally{
+			socket.close();
 		}
 	}
 }
