@@ -12,6 +12,8 @@ import advanos.gui.DancingGUIFrame;
 import advanos.messages.instances.ReceiveUDPMessage;
 import advanos.messages.instances.SendNetworkBroadcastMessage;
 import advanos.messages.instances.SendRingAssignmentMessage;
+import advanos.messages.instances.SendTokenConfirmedMessage;
+import advanos.messages.instances.SendTokenMessage;
 import advanos.threads.Request;
 
 public class NodeApplication {
@@ -43,9 +45,13 @@ public class NodeApplication {
 	public static boolean IS_LEADER;
 	private int port;
 
+	private boolean wantToDance;
+	
+	public static boolean TOKEN = false;
+
 	public NodeApplication(int port, boolean isLeader) {
 		this.port = port;
-		NodeApplication.IS_LEADER = isLeader;
+		NodeApplication.TOKEN = NodeApplication.IS_LEADER = isLeader;
 		NodeApplication.PROCESS_ID = ManagementFactory.getRuntimeMXBean().getName();
 
 		gui = new DancingGUIFrame();
@@ -56,10 +62,8 @@ public class NodeApplication {
 
 		createNetworkBroadcastThread(port);
 		createReceiveUDPThread(port);
-		if (isLeader) {
-
-			
-		}
+		
+		
 	}
 
 	private void createNetworkBroadcastThread(int port) {
@@ -120,16 +124,66 @@ public class NodeApplication {
 			if (text.length == 3 && text[2].trim().equalsIgnoreCase("LEADER")){
 				newHost.setLeader(true);
 				this.leader = newHost;
+				
 			}
 			
 			if (NodeApplication.IS_LEADER){
 				if (lastHost != null)
 					assignNextInTokenRing(lastHost, newHost);
 				
-				assignNextInTokenRing(newHost, this.leader);
+				if (newHost.equals(this.leader) == false)
+					assignNextInTokenRing(newHost, this.leader);
+				else
+					this.next = newHost;
 				// System.out.println("End of reassignment");
+				
+				attemptToDance();
 			}
 		}
 		gui.addUser(newHost);
+	}
+
+	public void receiveSentToken(String[] text, String ipAddress) {
+		// You got the token from this guy
+		Host host = getHost(ipAddress);
+		
+		// Inform the guy you received it
+		confirmReceiptOfToken(host);
+		
+		attemptToDance();
+	}
+	
+	public synchronized void attemptToDance(){
+		if (TOKEN){
+			double s = Math.random() * 100;
+			if (s > 90){ // 10% chance to dance
+				gui.dance();
+			}
+			releaseToken(next);
+		}
+	}
+
+	private void releaseToken(Host next) {
+		System.out.println("Releasing token, giving it to " + next);
+		try {
+			SendTokenMessage sendTokenMessage = new SendTokenMessage(port, null, next.getIPAddress());
+			sendTokenMessage.start();
+		} catch (SocketException | UnsupportedEncodingException | UnknownHostException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void confirmReceiptOfToken(Host host) {
+		TOKEN = true;
+		try {
+			SendTokenConfirmedMessage sendTokenConfirmedMessage = new SendTokenConfirmedMessage(port, null, host.getIPAddress());
+			sendTokenConfirmedMessage.start();
+		} catch (SocketException | UnsupportedEncodingException | UnknownHostException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void receiveSentTokenConfirmation(String[] text, String ipAddress) {
+		NodeApplication.TOKEN = false;
 	}
 }

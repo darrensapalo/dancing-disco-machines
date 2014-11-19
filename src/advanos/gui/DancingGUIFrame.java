@@ -69,4 +69,10 @@ public class DancingGUIFrame extends JFrame {
 		else
 			lblStatus.setText("Status: Dancing individually");
 	}
+
+	public void dance() {
+		System.err.println("I'm dancing!");
+		System.out.println();
+		
+	}
 }

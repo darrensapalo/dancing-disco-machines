@@ -28,6 +28,14 @@ public class ReceiveUDPMessage extends ReceiveMessage
 		case "ASSIGN":
 			nodeApplication.setNextInTokenRing(ipAddress);
 			break;
+			
+		case "SEND":
+			nodeApplication.receiveSentToken(text, ipAddress);
+			break;
+			
+		case "RECEIVED":
+			nodeApplication.receiveSentTokenConfirmation(text, ipAddress);
+			break;
 		}
 	}
 
