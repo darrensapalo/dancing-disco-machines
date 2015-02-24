@@ -1,6 +1,7 @@
 package advanos.messages.instances;
 
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
@@ -14,7 +15,16 @@ public class SendNetworkBroadcastMessage extends SendRepeatingMessage {
 		
 		// BROADCAST_ALIVE 4849@192.168.10.1
 		// BROADCAST_ALIVE 3241@192.168.10.1 LEADER
-
 	}
-
+	
+	public static SendNetworkBroadcastMessage create(int port, String MULTICAST_GROUP){
+		try {
+			SendNetworkBroadcastMessage networkBroadcastThread = new SendNetworkBroadcastMessage(port, null, MULTICAST_GROUP);
+			
+			return networkBroadcastThread;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 }

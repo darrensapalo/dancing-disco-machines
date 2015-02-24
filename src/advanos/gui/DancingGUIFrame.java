@@ -48,6 +48,9 @@ public class DancingGUIFrame extends JFrame {
 		setLayout(boxLayout);
 		pack();
 		setLocationRelativeTo(null);
+		setVisible(true);
+		
+
 	}
 
 	public void addUser(Host h) {
@@ -58,7 +61,7 @@ public class DancingGUIFrame extends JFrame {
 		}
 	}
 	
-	public void removeUser(Host h){
+	public void removeHost(Host h){
 		String elem = h.toString();
 		listModel.removeElement(elem);
 	}
@@ -71,8 +74,10 @@ public class DancingGUIFrame extends JFrame {
 	}
 
 	public void dance() {
-		System.err.println("I'm dancing!");
-		System.out.println();
-		
+		setDanceOnStage(true);
+	}
+	
+	public void stopDance() {
+		setDanceOnStage(false);
 	}
 }
