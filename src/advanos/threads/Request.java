@@ -1,5 +1,9 @@
 package advanos.threads;
 
+import lombok.Builder;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+
 /**
  * This class is used for synchronization between
  * distributed systems. A Request class contains the
@@ -11,22 +15,12 @@ package advanos.threads;
  * @author Darren
  *
  */
+@Builder
+@RequiredArgsConstructor
 public class Request {
+	@NonNull
 	private int timestamp;
+	@NonNull
 	private String uniqueProcessID;
 
-	public Request(String uniqueProcessID, int timestamp) {
-		this.uniqueProcessID = uniqueProcessID;
-		this.timestamp = timestamp;
-	}
-
-	public int getTimestamp() {
-		return timestamp;
-	}
-
-	public String getIdentifier() {
-		return uniqueProcessID;
-	}
-	
-	
 }

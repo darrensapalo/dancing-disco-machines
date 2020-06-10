@@ -63,8 +63,6 @@ public class NodeApplication {
 
 		createNetworkBroadcastThread(port);
 		createReceiveUDPThread(port);
-		
-		
 	}
 
 	private void createNetworkBroadcastThread(int port) {
