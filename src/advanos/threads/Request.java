@@ -19,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class Request {
 	@NonNull
-	private int timestamp;
+	private Integer timestamp;
 	@NonNull
 	private String uniqueProcessID;
 

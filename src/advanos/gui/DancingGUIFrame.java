@@ -1,15 +1,11 @@
 package advanos.gui;
 
-import java.awt.Dimension;
-
-import javax.swing.BoxLayout;
-import javax.swing.DefaultListModel;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JScrollPane;
-
+import advanos.ApplicationState;
 import advanos.Host;
+import io.reactivex.subjects.BehaviorSubject;
+
+import javax.swing.*;
+import java.awt.*;
 
 public class DancingGUIFrame extends JFrame {
 
@@ -21,7 +17,7 @@ public class DancingGUIFrame extends JFrame {
 	private DefaultListModel<String> listModel;
 	private JList<String> connectedUsers;
 
-	public DancingGUIFrame() {
+	public DancingGUIFrame(BehaviorSubject<ApplicationState> applicationState) {
 		super("Disco machine");
 		setPreferredSize(new Dimension(450, 400));
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -37,6 +33,14 @@ public class DancingGUIFrame extends JFrame {
 		add(lblUsers);
 		
 		listModel = new DefaultListModel<String>();
+
+		applicationState.map(ApplicationState::getHosts)
+			.subscribe(hosts -> {
+				listModel.clear();
+				hosts.stream()
+					.map(Host::getProcessID)
+					.forEach(host -> listModel.addElement(host));
+			});
 		
 		connectedUsers = new JList<String>(listModel);
 		JScrollPane scrollpane = new JScrollPane(connectedUsers, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -52,7 +56,7 @@ public class DancingGUIFrame extends JFrame {
 
 	public void addUser(Host h) {
 		String elem = h.toString();
-		if (listModel.contains(elem) == false) {
+		if (!listModel.contains(elem)) {
 			listModel.addElement(elem);
 			connectedUsers.repaint();
 		}

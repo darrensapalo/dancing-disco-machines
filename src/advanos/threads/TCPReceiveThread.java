@@ -1,10 +1,10 @@
 package advanos.threads;
 
+import advanos.NodeApplication;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-
-import advanos.NodeApplication;
 
 /**
  * This class is for handling TCP socket connections from other systems.
@@ -19,7 +19,7 @@ public class TCPReceiveThread extends Thread {
 	public TCPReceiveThread(NodeApplication nodeApplication, int port) throws IOException  {
 			this.nodeApplication = nodeApplication;
 			serverSocket = new ServerSocket(port);
-			System.out.println(NodeApplication.PROCESS_ID + " has successfully created TCP thread bound at port " + port);
+//			System.out.println(NodeApplication.PROCESS_ID + " has successfully created TCP thread bound at port " + port);
 	}
 	
 	public void run() {

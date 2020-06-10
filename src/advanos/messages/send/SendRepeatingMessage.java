@@ -1,44 +1,34 @@
 package advanos.messages.send;
 
-import java.io.UnsupportedEncodingException;
-import java.net.DatagramPacket;
-import java.net.SocketException;
-import java.net.UnknownHostException;
+import advanos.Host;
+import advanos.messages.Messager;
+import io.reactivex.Observable;
 
 /**
  * <p>This class sends a message repeatedly to the destination over UDP on the given port at a certain interval.</p>
  * 
- * <p>Note that the message is sent multiple times. For single messages, see the SendMessage.</p>
+ * <p>Note that the message is sent multiple times. For single messages, see the SendUDPMessage.</p>
  * @author Darren
- * @see SendMessage
+ * @see SendUDPMessage
  */
-public abstract class SendRepeatingMessage extends SendMessage{
+public abstract class SendRepeatingMessage implements Messager<Boolean> {
 
-	private int msDelay;
+	/**
+	 * How long until the next UDP packet is sent out.
+	 */
+	public static final int DELAY_MS = 1000;
+	private final String message;
+	private final Host host;
 
-	public SendRepeatingMessage(int port, String message, String ipDestination, int msDelay) throws SocketException, UnsupportedEncodingException, UnknownHostException {
-		super(port, message, ipDestination);
-		this.msDelay = msDelay;
-	}
-	
-	public SendRepeatingMessage(int port, String message, String ipDestination) throws SocketException, UnsupportedEncodingException, UnknownHostException {
-		super(port, message, ipDestination);
-		this.msDelay = 1000;
+	public SendRepeatingMessage(String message, Host host)  {
+		this.message = message;
+		this.host = host;
+
 	}
 
 	@Override
-	public void run() {
-		try {
-			while(true){
-				DatagramPacket packet = new DatagramPacket(data, data.length, destination, port);
-				socket.send(packet);
-				
-				Thread.sleep(msDelay);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}finally{
-			socket.close();
-		}
+	public Observable<Boolean> perform() {
+		return new SendUDPMessage(this.message, this.host).perform()
+			.repeat(DELAY_MS);
 	}
 }
